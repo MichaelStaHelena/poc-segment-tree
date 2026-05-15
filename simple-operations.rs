@@ -10,6 +10,9 @@
 //
 // Como rodar:
 //   rustc simple-operations.rs && ./simple-operations
+//
+// Como rodar os testes:
+//   rustc --test simple-operations.rs -o simple-operations-test && ./simple-operations-test
 
 
 use std::cmp::{max, min};
@@ -382,6 +385,7 @@ fn main() {
     println!("  Conferindo na mao:    max de {:?} = {}", fatia, fatia.iter().max().unwrap());
 
 
+
     // ------------------------------------------------------
     // Demonstracao: casos de uso das vendas
     // ------------------------------------------------------
@@ -477,4 +481,154 @@ fn main() {
     println!("  Segment tree responde: {}", s3);
     let fatia = &spo2[2..6];
     println!("  Conferindo na mao:    min de {:?} = {}", fatia, fatia.iter().min().unwrap());
+}
+
+
+// ==========================================================
+// TESTES UNITARIOS
+// ==========================================================
+//
+// rustc --test simple-operations.rs -o simple-operations-test && ./simple-operations-test
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ----------------------------------------------------------
+    // MAX (notas)
+    // ----------------------------------------------------------
+
+    fn montar_tree_max() -> (Vec<i32>, Vec<i32>) {
+        let notas = vec![7, 3, 9, 5, 8, 2, 6, 4];
+        let m = notas.len();
+        let mut tree = vec![-1; 4 * m];
+        build_max(&notas, &mut tree, 1, 0, m - 1);
+        (notas, tree)
+    }
+
+    #[test]
+    fn max_consulta_turma_toda() {
+        let (notas, tree) = montar_tree_max();
+        let m = notas.len();
+        assert_eq!(consulta_max(&tree, 1, 0, m - 1, 0, m - 1), 9);
+    }
+
+    #[test]
+    fn max_consulta_alunos_3_a_6() {
+        let (notas, tree) = montar_tree_max();
+        let m = notas.len();
+        // indices 2..5 = valores [9, 5, 8, 2] -> max = 9
+        assert_eq!(consulta_max(&tree, 1, 0, m - 1, 2, 5), 9);
+    }
+
+    #[test]
+    fn max_consulta_alunos_6_a_8() {
+        let (notas, tree) = montar_tree_max();
+        let m = notas.len();
+        // indices 5..7 = valores [2, 6, 4] -> max = 6
+        assert_eq!(consulta_max(&tree, 1, 0, m - 1, 5, 7), 6);
+    }
+
+    #[test]
+    fn max_consulta_elemento_unico() {
+        let (notas, tree) = montar_tree_max();
+        let m = notas.len();
+        assert_eq!(consulta_max(&tree, 1, 0, m - 1, 0, 0), 7);
+        assert_eq!(consulta_max(&tree, 1, 0, m - 1, 2, 2), 9);
+    }
+
+    #[test]
+    fn max_atualizacao_nota_aluno5() {
+        let (mut notas, mut tree) = montar_tree_max();
+        let m = notas.len();
+        // aluno 5 (indice 4) refez prova: nota 10
+        atualiza_max(&mut notas, &mut tree, 1, 0, m - 1, 4, 10);
+        assert_eq!(consulta_max(&tree, 1, 0, m - 1, 2, 5), 10);
+        assert_eq!(tree[1], 10); // nova raiz
+    }
+
+    // ----------------------------------------------------------
+    // SOMA (vendas)
+    // ----------------------------------------------------------
+
+    fn montar_tree_soma() -> (Vec<i32>, Vec<i32>) {
+        let vendas = vec![4, 1, 3, 5, 2, 6, 1, 2];
+        let n = vendas.len();
+        let mut tree = vec![0; 4 * n];
+        build(&vendas, &mut tree, 1, 0, n - 1);
+        (vendas, tree)
+    }
+
+    #[test]
+    fn soma_consulta_total() {
+        let (vendas, tree) = montar_tree_soma();
+        let n = vendas.len();
+        // 4+1+3+5+2+6+1+2 = 24
+        assert_eq!(consulta(&tree, 1, 0, n - 1, 0, n - 1), 24);
+    }
+
+    #[test]
+    fn soma_consulta_dias_3_a_6() {
+        let (vendas, tree) = montar_tree_soma();
+        let n = vendas.len();
+        // indices 2..5 = valores [3, 5, 2, 6] -> soma = 16
+        assert_eq!(consulta(&tree, 1, 0, n - 1, 2, 5), 16);
+    }
+
+    #[test]
+    fn soma_atualizacao_dia4() {
+        let (mut vendas, mut tree) = montar_tree_soma();
+        let n = vendas.len();
+        // dia 4 (indice 3) corrigido de 5 para 7
+        atualiza(&mut vendas, &mut tree, 1, 0, n - 1, 3, 7);
+        // [3, 7, 2, 6] -> soma = 18
+        assert_eq!(consulta(&tree, 1, 0, n - 1, 2, 5), 18);
+        // total: 24 - 5 + 7 = 26
+        assert_eq!(tree[1], 26);
+    }
+
+    // ----------------------------------------------------------
+    // MIN (spo2)
+    // ----------------------------------------------------------
+
+    fn montar_tree_min() -> (Vec<i32>, Vec<i32>) {
+        let spo2 = vec![98, 97, 92, 94, 96, 99, 95, 93];
+        let s = spo2.len();
+        let mut tree = vec![INF; 4 * s];
+        build_min(&spo2, &mut tree, 1, 0, s - 1);
+        (spo2, tree)
+    }
+
+    #[test]
+    fn min_consulta_dia_todo() {
+        let (spo2, tree) = montar_tree_min();
+        let s = spo2.len();
+        assert_eq!(consulta_min(&tree, 1, 0, s - 1, 0, s - 1), 92);
+    }
+
+    #[test]
+    fn min_consulta_10h_a_16h() {
+        let (spo2, tree) = montar_tree_min();
+        let s = spo2.len();
+        // indices 2..5 = valores [92, 94, 96, 99] -> min = 92
+        assert_eq!(consulta_min(&tree, 1, 0, s - 1, 2, 5), 92);
+    }
+
+    #[test]
+    fn min_consulta_elemento_unico() {
+        let (spo2, tree) = montar_tree_min();
+        let s = spo2.len();
+        assert_eq!(consulta_min(&tree, 1, 0, s - 1, 0, 0), 98);
+        assert_eq!(consulta_min(&tree, 1, 0, s - 1, 2, 2), 92);
+    }
+
+    #[test]
+    fn min_atualizacao_medicao_10h() {
+        let (mut spo2, mut tree) = montar_tree_min();
+        let s = spo2.len();
+        // medicao das 10h (indice 2) corrigida de 92 para 90
+        atualiza_min(&mut spo2, &mut tree, 1, 0, s - 1, 2, 90);
+        assert_eq!(consulta_min(&tree, 1, 0, s - 1, 2, 5), 90);
+        assert_eq!(tree[1], 90); // novo min geral
+    }
 }

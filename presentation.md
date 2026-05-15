@@ -112,8 +112,7 @@ Nota:   7   3   9   5   8   2   6   4
 >
 > Memória? Linear — cerca de **4n** posições na versão recursiva (ou 2n na iterativa).
 >
-> Existem ainda `range_update` (com *lazy propagation*) e `find_first`, mas são detalhes
-> de extensão — o núcleo é esse."
+> Range update em intervalo também é O(log n) — com lazy propagation. Não entra hoje, mas está documentado se quiserem se aprofundar."
 
 ---
 
@@ -224,6 +223,64 @@ Boletim da turma          Extrato do cartão          Prontuário eletrônico
 | *"Dá para min e max também ou só soma?"*      | Qualquer **merge associativo** funciona: soma, min, max, XOR, GCD, produto. Basta trocar a função `merge` e o **elemento neutro**. |
 | *"Qual a diferença para árvore binária de busca?"* | BST guarda **itens** e responde *"esse valor existe?"*. Segment tree guarda **resumos de intervalos** e responde *"qual o agregado de i até j?"*. Perguntas diferentes. |
 | *"Serve em produção mesmo?"*                  | Sim — editores de texto (índice de linhas), trading (order book), jogos (colisão por faixa), monitoramento (métricas por janela). Sempre que o padrão é "lista muda + perguntas sobre pedaços". |
+
+---
+
+---
+
+## ⏱️ Slide Extra A — Quando NÃO Usar · **2 min** *(versão 15 min — time)*
+
+> Esse slide entra depois do Slide 5. Engenheiros sempre perguntam sobre trade-offs.
+
+**Visual — tabela de decisão:**
+
+| Situação | Use em vez disso |
+|----------|-----------------|
+| Array estático, só soma | Prefix sum — O(1) query |
+| Array estático, min/max | Sparse table — O(1) query |
+| Só soma + point update | Fenwick tree — código 3× menor |
+| n pequeno (< 500) | Loop simples |
+| Dados em banco com índice | Deixa o banco resolver |
+
+**Fala:**
+> "Segment tree tem custo de implementação. Antes de usar, vale checar:
+>
+> Se o array **nunca muda**, um prefix sum ou sparse table dão O(1) na query — melhor do que O(log n).
+>
+> Se você só precisa de **soma com point update**, Fenwick tree resolve com um terço do código.
+>
+> Se o **n é pequeno** — digamos, menos de 500 elementos — um loop simples é mais legível e provavelmente mais rápido na prática por causa dos caches.
+>
+> E se os dados estão num banco, índices B-tree cobrem a maior parte dos casos — não traga complexidade para a aplicação sem necessidade.
+>
+> Segment tree brilha quando você tem **intervalo arbitrário + update frequente + merge customizado**. Fora desse triângulo, avalie antes."
+
+---
+
+## ⏱️ Slide Extra B — O Que Eu Aprenderia Diferente · **1 min** *(versão 15 min — time)*
+
+> Slide de fechamento para a apresentação de time. Mostra maturidade e reflexão — não só "olha o que eu fiz".
+
+**Visual — lista curta:**
+
+```
+Se eu começasse de novo:
+
+1. Começaria pela aplicação real antes dos exemplos genéricos
+2. Construiria o visualizador mais cedo
+3. Implementaria a versão iterativa antes da recursiva
+```
+
+**Fala:**
+> "Três coisas que faria diferente:
+>
+> **Primeiro** — começaria direto pelo caso de contratos de empréstimo, não pelos exemplos genéricos de alunos e hospitais. Quando você ancora no domínio real desde o início, o resto faz mais sentido.
+>
+> **Segundo** — teria construído o visualizador HTML no começo, não no final. Visualizar o traversal da árvore clarificou em 10 minutos o que horas de leitura não conseguiram.
+>
+> **Terceiro** — implementaria a versão iterativa flat antes da recursiva. Ela é menor, mais usada em produção, e te força a entender o layout de memória de verdade — não só a recursão.
+>
+> No fim, o que mais aprendi foi sobre como a mesma estrutura se adapta a domínios completamente diferentes só trocando o merge. Isso é design de software, não só algoritmo."
 
 ---
 

@@ -20,6 +20,9 @@
 //
 // Como rodar:
 //   rustc loan-contracts.rs && ./loan-contracts
+//
+// Como rodar os testes:
+//   rustc --test loan-contracts.rs -o loan-contracts-test && ./loan-contracts-test
 
 
 // ==========================================================
@@ -481,4 +484,211 @@ fn main() {
     let manual: f64 = contratos.iter().map(|x| x.valor).sum();
     println!("  Exposicao total agora: R$ {:.2}", tree[1]);
     println!("  Conferindo na mao:     R$ {:.2}", manual);
+}
+
+
+// ==========================================================
+// TESTES UNITARIOS
+// ==========================================================
+//
+// rustc --test loan-contracts.rs -o loan-contracts-test && ./loan-contracts-test
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // carteira: Alice(1,5000,30) Bob(2,12000,7) Carol(3,3200,45) David(4,8500,14)
+    //           Eve(5,2100,2)   Frank(6,9900,21) Grace(7,6700,60) Hank(8,4400,9)
+
+    // ----------------------------------------------------------
+    // Use case 1: MAIS URGENTE (min por dias)
+    // ----------------------------------------------------------
+
+    fn montar_tree_urg(contratos: &[ContratoEmprestimo]) -> Vec<ContratoEmprestimo> {
+        let c = contratos.len();
+        let mut tree: Vec<ContratoEmprestimo> = (0..4 * c).map(|_| neutro_urg()).collect();
+        build_urg(contratos, &mut tree, 1, 0, c - 1);
+        tree
+    }
+
+    #[test]
+    fn urg_raiz_e_eve() {
+        let contratos = init_contratos();
+        let tree = montar_tree_urg(&contratos);
+        assert_eq!(tree[1].contrato_id, 5); // Eve - 2 dias
+        assert_eq!(tree[1].dias_para_pagar, 2);
+    }
+
+    #[test]
+    fn urg_query_1_a_4_e_bob() {
+        let contratos = init_contratos();
+        let c = contratos.len();
+        let tree = montar_tree_urg(&contratos);
+        // Alice(30) Bob(7) Carol(45) David(14) -> Bob mais urgente
+        let r = consulta_urg(&tree, 1, 0, c - 1, 0, 3);
+        assert_eq!(r.contrato_id, 2);
+        assert_eq!(r.dias_para_pagar, 7);
+    }
+
+    #[test]
+    fn urg_query_5_a_8_e_eve() {
+        let contratos = init_contratos();
+        let c = contratos.len();
+        let tree = montar_tree_urg(&contratos);
+        // Eve(2) Frank(21) Grace(60) Hank(9) -> Eve mais urgente
+        let r = consulta_urg(&tree, 1, 0, c - 1, 4, 7);
+        assert_eq!(r.contrato_id, 5);
+    }
+
+    #[test]
+    fn urg_apos_renegociacao_eve_bob_assume() {
+        let mut contratos = init_contratos();
+        let c = contratos.len();
+        let mut tree: Vec<ContratoEmprestimo> = (0..4 * c).map(|_| neutro_urg()).collect();
+        build_urg(&contratos, &mut tree, 1, 0, c - 1);
+        atualiza_urg(&mut contratos, &mut tree, 1, 0, c - 1, 4,
+                     ContratoEmprestimo::new(5, "Eve", 1_500.00, 90));
+        // Eve agora tem 90 dias; Bob (7) assume como mais urgente
+        let r = consulta_urg(&tree, 1, 0, c - 1, 0, 7);
+        assert_eq!(r.contrato_id, 2);
+        assert_eq!(r.dias_para_pagar, 7);
+    }
+
+    // ----------------------------------------------------------
+    // Use case 2: MAIS FOLGADO (max por dias)
+    // ----------------------------------------------------------
+
+    fn montar_tree_folga(contratos: &[ContratoEmprestimo]) -> Vec<ContratoEmprestimo> {
+        let c = contratos.len();
+        let mut tree: Vec<ContratoEmprestimo> = (0..4 * c).map(|_| neutro_folga()).collect();
+        build_folga(contratos, &mut tree, 1, 0, c - 1);
+        tree
+    }
+
+    #[test]
+    fn folga_raiz_e_grace() {
+        let contratos = init_contratos();
+        let tree = montar_tree_folga(&contratos);
+        assert_eq!(tree[1].contrato_id, 7); // Grace - 60 dias
+        assert_eq!(tree[1].dias_para_pagar, 60);
+    }
+
+    #[test]
+    fn folga_query_1_a_4_e_carol() {
+        let contratos = init_contratos();
+        let c = contratos.len();
+        let tree = montar_tree_folga(&contratos);
+        // Alice(30) Bob(7) Carol(45) David(14) -> Carol mais folgado
+        let r = consulta_folga(&tree, 1, 0, c - 1, 0, 3);
+        assert_eq!(r.contrato_id, 3);
+        assert_eq!(r.dias_para_pagar, 45);
+    }
+
+    // ----------------------------------------------------------
+    // Use case 3: MENOR SALDO (min por valor)
+    // ----------------------------------------------------------
+
+    fn montar_tree_menor(contratos: &[ContratoEmprestimo]) -> Vec<ContratoEmprestimo> {
+        let c = contratos.len();
+        let mut tree: Vec<ContratoEmprestimo> = (0..4 * c).map(|_| neutro_menor()).collect();
+        build_menor(contratos, &mut tree, 1, 0, c - 1);
+        tree
+    }
+
+    #[test]
+    fn menor_raiz_e_eve() {
+        let contratos = init_contratos();
+        let tree = montar_tree_menor(&contratos);
+        assert_eq!(tree[1].contrato_id, 5); // Eve - R$2.100
+    }
+
+    #[test]
+    fn menor_query_1_a_4_e_carol() {
+        let contratos = init_contratos();
+        let c = contratos.len();
+        let tree = montar_tree_menor(&contratos);
+        // Alice(5000) Bob(12000) Carol(3200) David(8500) -> Carol menor saldo
+        let r = consulta_menor(&tree, 1, 0, c - 1, 0, 3);
+        assert_eq!(r.contrato_id, 3);
+    }
+
+    // ----------------------------------------------------------
+    // Use case 4: MAIOR EXPOSICAO (max por valor)
+    // ----------------------------------------------------------
+
+    fn montar_tree_maior(contratos: &[ContratoEmprestimo]) -> Vec<ContratoEmprestimo> {
+        let c = contratos.len();
+        let mut tree: Vec<ContratoEmprestimo> = (0..4 * c).map(|_| neutro_maior()).collect();
+        build_maior(contratos, &mut tree, 1, 0, c - 1);
+        tree
+    }
+
+    #[test]
+    fn maior_raiz_e_bob() {
+        let contratos = init_contratos();
+        let tree = montar_tree_maior(&contratos);
+        assert_eq!(tree[1].contrato_id, 2); // Bob - R$12.000
+    }
+
+    #[test]
+    fn maior_query_5_a_8_e_frank() {
+        let contratos = init_contratos();
+        let c = contratos.len();
+        let tree = montar_tree_maior(&contratos);
+        // Eve(2100) Frank(9900) Grace(6700) Hank(4400) -> Frank maior exposicao
+        let r = consulta_maior(&tree, 1, 0, c - 1, 4, 7);
+        assert_eq!(r.contrato_id, 6);
+    }
+
+    // ----------------------------------------------------------
+    // Use case 5: EXPOSICAO TOTAL (sum por valor)
+    // ----------------------------------------------------------
+
+    fn montar_tree_soma(contratos: &[ContratoEmprestimo]) -> Vec<f64> {
+        let c = contratos.len();
+        let mut tree = vec![0.0f64; 4 * c];
+        build_soma(contratos, &mut tree, 1, 0, c - 1);
+        tree
+    }
+
+    #[test]
+    fn soma_total_carteira() {
+        let contratos = init_contratos();
+        let tree = montar_tree_soma(&contratos);
+        // 5000+12000+3200+8500+2100+9900+6700+4400 = 51800
+        assert!((tree[1] - 51_800.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn soma_query_1_a_4() {
+        let contratos = init_contratos();
+        let c = contratos.len();
+        let tree = montar_tree_soma(&contratos);
+        // 5000+12000+3200+8500 = 28700
+        let total = consulta_soma(&tree, 1, 0, c - 1, 0, 3);
+        assert!((total - 28_700.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn soma_query_5_a_8() {
+        let contratos = init_contratos();
+        let c = contratos.len();
+        let tree = montar_tree_soma(&contratos);
+        // 2100+9900+6700+4400 = 23100
+        let total = consulta_soma(&tree, 1, 0, c - 1, 4, 7);
+        assert!((total - 23_100.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn soma_apos_quitacao_parcial_eve() {
+        let mut contratos = init_contratos();
+        let c = contratos.len();
+        let mut tree = vec![0.0f64; 4 * c];
+        build_soma(&contratos, &mut tree, 1, 0, c - 1);
+        // Eve quitou parcialmente: novo saldo R$500
+        atualiza_soma(&mut contratos, &mut tree, 1, 0, c - 1, 4,
+                      ContratoEmprestimo::new(5, "Eve", 500.00, 2));
+        // 51800 - 2100 + 500 = 50200
+        assert!((tree[1] - 50_200.0).abs() < 0.01);
+    }
 }

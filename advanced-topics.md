@@ -214,6 +214,36 @@ Na forma moderna usada em programação competitiva e entrevistas, ela é uma **
 
 ---
 
+## 7. Quando NÃO Usar Segment Tree
+
+Segment tree é poderosa, mas tem overhead de implementação e memória. Em vários casos, existe uma solução mais simples.
+
+| Situação | Alternativa | Por quê trocar |
+|----------|-------------|----------------|
+| Array **estático** (sem updates) + queries de soma | **Prefix sum** | Build O(n), query O(1), implementação de 5 linhas |
+| Array **estático** + queries de min/max | **Sparse table** | Build O(n log n), query O(1) — ainda melhor que O(log n) |
+| Só **soma** com point updates | **Fenwick tree (BIT)** | Código 3× mais curto, constantes menores, mesma complexidade |
+| **n pequeno** (< ~500) | Array simples + loop | Overhead da árvore não compensa para arrays pequenos |
+| Updates **muito raros** em relação a queries | Rebuild na força bruta | Complexidade de código não vale se updates são raro |
+| Dados em **banco** com índices adequados | Índice B-tree / coluna indexada | Banco já resolve; não traga complexidade desnecessária para a aplicação |
+| Query de **existência** ou **ordenação** | BST / sorted set | Segment tree responde "qual o agregado?" — não "este valor existe?" |
+
+### Resumo da decisão
+
+```
+Precisa de range query com updates?
+├── Só soma + point update?  → Fenwick tree
+├── Min/max/soma com range update? → Segment tree com lazy
+├── Array nunca muda?
+│   ├── Soma?  → Prefix sum
+│   └── Min/max? → Sparse table
+└── n pequeno?  → Force bruta, não complique
+```
+
+A segment tree brilha quando o problema tem **intervalo arbitrário + update frequente + merge customizado** — fora desse triângulo, avalie antes.
+
+---
+
 ## Mnemônico final
 
 > *"Pré-compute respostas de metades; consulte combinando poucas metades; atualize só o caminho afetado; adie updates de intervalo com lazy."*
