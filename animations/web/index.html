@@ -12,12 +12,13 @@
     --text: #e2e8f0;
     --muted: #94a3b8;
     --accent: #38bdf8;
-    --idle: #cbd5e1;
-    --visit: #fbbf24;
-    --inside: #22c55e;
-    --outside: #64748b;
-    --partial: #fb923c;
-    --update: #60a5fa;
+    --edge: #f87171;
+    --idle: #44403c;
+    --visit: #fef08a;
+    --inside: #fbbf24;
+    --outside: #292524;
+    --partial: #ef4444;
+    --update: #e879f9;
   }
   * { box-sizing: border-box; }
   body {
@@ -110,7 +111,7 @@
   .node circle { stroke-width: 2; transition: stroke 0.3s, fill 0.3s; }
   .node text.value { font-weight: 600; fill: var(--text); pointer-events: none; }
   .node text.range { fill: var(--muted); font-size: 10px; pointer-events: none; }
-  .edge { stroke: var(--border); stroke-width: 1.5; }
+  .edge { stroke: var(--edge); stroke-width: 2; }
   .array-cell rect { fill: #0c1220; stroke: var(--border); transition: stroke 0.3s, stroke-width 0.3s; }
   .array-cell text.val { fill: var(--text); font-weight: 600; }
   .array-cell text.idx { fill: var(--muted); font-size: 10px; }
