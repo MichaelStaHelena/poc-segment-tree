@@ -179,12 +179,22 @@ Boletim da turma          Extrato do cartão          Prontuário eletrônico
 
 ## 🎯 Checklist de Ensaio
 
-- [ ] Slide 1–2: **1 minuto** (abertura + problema)
-- [ ] Slide 3: **1 minuto** (o que é, com desenho)
-- [ ] Slide 4: **1 minuto** (operações, tabela)
-- [ ] Slide 5: **1 minuto 20 s** (três casos de uso)
+**Versão 5 min (orientador / estudantes)**
+- [ ] Slide 1–2: **1 min** (abertura + problema)
+- [ ] Slide 3: **1 min** (o que é, com desenho)
+- [ ] Slide 4: **1 min** (operações, tabela)
+- [ ] Slide 5: **1 min 20 s** (três casos de uso)
 - [ ] Slide 6: **30 s** (fechamento)
-- [ ] **Total: ~5 minutos**
+- [ ] **Total: ~5 min**
+
+**Versão 15 min (time de engenharia)**
+- [ ] Slide Extra A: **2 min** (abertura peer-to-peer)
+- [ ] Slides 2–5: **3 min** (problema, estrutura, operações, casos)
+- [ ] Slide Extra B: **5 min** (demo ao vivo — visualizador)
+- [ ] Slide Extra C: **2 min** (quando não usar)
+- [ ] Slide Extra D: **1 min** (o que aprenderia diferente)
+- [ ] Perguntas: **2 min**
+- [ ] **Total: ~15 min**
 
 ---
 
@@ -192,9 +202,15 @@ Boletim da turma          Extrato do cartão          Prontuário eletrônico
 
 - [binary-tree-vs-segment-tree.md](binary-tree-vs-segment-tree.md) — se perguntarem a diferença
 - [advanced-topics.md](advanced-topics.md) — lazy, variantes, BIT vs Segment, armadilhas
-- [simple-operations.py](simple-operations.py) — **script da pré-apresentação**: os 3 casos (notas/MAX, vendas/SOMA, saturação/MIN) com validação *"conferindo na mão"*
-- [perguntas-e-respostas.md](perguntas-e-respostas.md) — **banco de Q&A** organizado por tema (conceito, operações, complexidade, lazy, comparações, variantes, armadilhas, história, pegadinhas)
-- [operations.py](operations.py) — todas as operações em código, comentadas linha a linha
+- [simple-operations.py](simple-operations.py) — os 3 casos (notas/MAX, vendas/SOMA, saturação/MIN) com validação *"conferindo na mão"*
+- [loan-contracts.py](loan-contracts.py) — 5 use cases com objetos (demo ao vivo em código)
+- [perguntas-e-respostas.md](perguntas-e-respostas.md) — **banco de Q&A** organizado por tema
+- [short-answer.md](short-answer.md) — referência rápida para distribuir ao time
+
+**Arquivos para ter abertos na versão 15 min:**
+1. `animations/web/loan-contracts.html` — demo principal
+2. `perguntas-e-respostas.md` — referência para Q&A
+3. `advanced-topics.md` — se entrarem em lazy ou variantes
 
 ---
 
@@ -204,7 +220,7 @@ Boletim da turma          Extrato do cartão          Prontuário eletrônico
    > *"Eu troco o trabalho de olhar elemento por elemento pelo trabalho de combinar poucos blocos já prontos. Isso é segment tree."*
 2. **Use a mesma turma de 8 alunos em todos os slides.** Familiaridade ajuda.
 3. **Rode o `simple-operations.py` ao vivo para o orientador.** Ele mostra os três casos (notas, vendas, saturação) e em cada consulta imprime a resposta da árvore **e** o *"conferindo na mão"* — serve como prova de que a estrutura acerta.
-4. **Ponte apresentação → código:** ao terminar o slide 5, diga *"esses três casos estão implementados no `simple-operations.py` — a única coisa que muda entre eles é **o merge e o elemento neutro**."* O script tem marcadores `*** UNICA DIFERENCA ***` destacando isso.
+4. **Ponte apresentação → código:** ao terminar o slide 5, diga *"esses três casos estão implementados no `simple-operations.py` — a única coisa que muda entre eles é a função `merge_*` e o elemento neutro."* Cada use case define sua própria `merge_max`, `merge_soma` ou `merge_min`.
 5. **Se perguntarem "por que não usar uma árvore binária comum?"**, responda em 10 segundos: *"árvore binária guarda itens individuais; segment tree guarda resumos de intervalos — respondem perguntas diferentes."*
 6. **Se perguntarem "por que não Fenwick tree (BIT)?"**, responda: *"BIT é ótimo só para soma/prefixo. Para min, max ou range update em intervalo, segment tree é mais natural."*
 7. **Se perguntarem sobre lazy**, use a frase: *"É uma promessa de update. Em vez de descer e atualizar tudo, deixo um bilhete dizendo 'há um +10 pendente aqui' e só aplico quando realmente precisar entrar."*
@@ -228,9 +244,58 @@ Boletim da turma          Extrato do cartão          Prontuário eletrônico
 
 ---
 
-## ⏱️ Slide Extra A — Quando NÃO Usar · **2 min** *(versão 15 min — time)*
+## ⏱️ Slide Extra A — Abertura para o time · **2 min** *(versão 15 min — substituir Slide 1)*
 
-> Esse slide entra depois do Slide 5. Engenheiros sempre perguntam sobre trade-offs.
+> Para a apresentação de engenheiros (peer-to-peer), substitua a abertura do Slide 1 por esta fala direta — sem slides, em pé.
+
+**Fala:**
+> "Recebi um tema: **segment tree**.
+>
+> Primeira reação: mais uma estrutura de dados de livro que nunca vou usar no dia a dia.
+>
+> Aí me fiz uma pergunta: **onde isso aparece no que a gente faz de verdade?**
+>
+> Trabalho com contratos de empréstimo. Perguntas como *'qual o contrato mais urgente nesse range?'*,
+> *'qual a maior exposição num intervalo de clientes?'*, *'qual o total da carteira de um segmento?'*
+> — isso aparece o tempo todo.
+>
+> Então a POC virou isso: **segment tree aplicada a contratos de empréstimo**.
+> E o que descobri é que a estrutura é mais elegante do que eu esperava."
+
+---
+
+## ⏱️ Slide Extra B — Demo ao Vivo · **5 min** *(versão 15 min — após Slide 5)*
+
+> Abrir `animations/web/loan-contracts.html` no navegador antes de começar.
+> Este slide entra logo depois do Slide 5 (Casos de Uso).
+
+**Fala:**
+> "Deixa eu mostrar na prática.
+> Temos uma carteira de 8 contratos — cada um com devedor, valor e dias para pagar."
+
+**[Selecionar: MIN | dias_para_pagar]**
+> "Primeira pergunta: *qual o contrato mais urgente entre as posições 1 e 4?*
+> Vejam os nós em cinza — a árvore nem toca neles. É exatamente isso que dá O(log n)."
+
+**[Selecionar: MAX | valor]**
+> "Segunda: *qual a maior exposição entre as posições 2 e 5?*
+> Mesma estrutura, merge diferente. O código da árvore não mudou — só a função que combina os nós."
+
+**[Selecionar: SUM | valor]**
+> "Terceira: *qual o total da carteira nesses contratos?*"
+
+**[Fazer point update em uma posição]**
+> "Agora um update: um contrato foi renegociado, prazo estendido.
+> A árvore recalcula só o caminho daquele nó até a raiz. O restante permanece intacto.
+>
+> Isso é o núcleo: divide o array em intervalos canônicos, pré-computa respostas,
+> combina na hora da consulta, atualiza só o caminho afetado."
+
+---
+
+## ⏱️ Slide Extra C — Quando NÃO Usar · **2 min** *(versão 15 min — após Demo)*
+
+> Engenheiros sempre perguntam sobre trade-offs.
 
 **Visual — tabela de decisão:**
 
@@ -257,7 +322,7 @@ Boletim da turma          Extrato do cartão          Prontuário eletrônico
 
 ---
 
-## ⏱️ Slide Extra B — O Que Eu Aprenderia Diferente · **1 min** *(versão 15 min — time)*
+## ⏱️ Slide Extra D — O Que Eu Aprenderia Diferente · **1 min** *(versão 15 min — fechamento)*
 
 > Slide de fechamento para a apresentação de time. Mostra maturidade e reflexão — não só "olha o que eu fiz".
 

@@ -34,6 +34,10 @@ tree_notas = [-1] * (4 * M)
 #   no     = indice do nó atual dentro de tree_notas[] (comeca em 1 = raiz)
 #   inicio = primeiro indice do array que esse nó cobre
 #   fim    = ultimo indice do array que esse nó cobre
+def merge_max(a, b):
+    return max(a, b)
+
+
 def build_max(no, inicio, fim):
 
     # se o intervalo tem um unico elemento, esse nó e uma FOLHA.
@@ -53,7 +57,7 @@ def build_max(no, inicio, fim):
 
     # depois que os filhos estao prontos, esse nó guarda o MAIOR deles.
     # ou seja: cada nó interno = max do pedaco do array que ele cobre.
-    tree_notas[no] = max(tree_notas[2 * no], tree_notas[2 * no + 1])
+    tree_notas[no] = merge_max(tree_notas[2 * no], tree_notas[2 * no + 1])
 
 
 # ----------------------------------------------------------
@@ -76,7 +80,7 @@ def consulta_max(no, inicio, fim, l, r):
     meio = (inicio + fim) // 2
     maior_esq = consulta_max(2 * no, inicio, meio, l, r)
     maior_dir = consulta_max(2 * no + 1, meio + 1, fim, l, r)
-    return max(maior_esq, maior_dir)
+    return merge_max(maior_esq, maior_dir)
 
 
 # ----------------------------------------------------------
@@ -101,7 +105,7 @@ def atualiza_max(no, inicio, fim, posicao, novo_valor):
 
     # ao voltar da recursao, um dos filhos mudou.
     # entao recalcula esse nó pegando o max dos dois filhos.
-    tree_notas[no] = max(tree_notas[2 * no], tree_notas[2 * no + 1])
+    tree_notas[no] = merge_max(tree_notas[2 * no], tree_notas[2 * no + 1])
 
 
 # ----------------------------------------------------------
@@ -200,6 +204,10 @@ tree = [0] * (4 * N)
 # ----------------------------------------------------------
 # build - monta a arvore de soma
 # ----------------------------------------------------------
+def merge_soma(a, b):
+    return a + b
+
+
 def build(no, inicio, fim):
 
     if inicio == fim:
@@ -210,9 +218,7 @@ def build(no, inicio, fim):
     build(2 * no, inicio, meio)
     build(2 * no + 1, meio + 1, fim)
 
-    # *** UNICA DIFERENCA pro build_max ***
-    # em vez de max, soma os dois filhos
-    tree[no] = tree[2 * no] + tree[2 * no + 1]
+    tree[no] = merge_soma(tree[2 * no], tree[2 * no + 1])
 
 
 # ----------------------------------------------------------
@@ -232,10 +238,7 @@ def consulta(no, inicio, fim, l, r):
     meio = (inicio + fim) // 2
     soma_esq = consulta(2 * no, inicio, meio, l, r)
     soma_dir = consulta(2 * no + 1, meio + 1, fim, l, r)
-
-    # *** UNICA DIFERENCA pra consulta_max ***
-    # soma em vez de max
-    return soma_esq + soma_dir
+    return merge_soma(soma_esq, soma_dir)
 
 
 # ----------------------------------------------------------
@@ -254,9 +257,7 @@ def atualiza(no, inicio, fim, posicao, novo_valor):
     else:
         atualiza(2 * no + 1, meio + 1, fim, posicao, novo_valor)
 
-    # *** UNICA DIFERENCA pro atualiza_max ***
-    # soma em vez de max
-    tree[no] = tree[2 * no] + tree[2 * no + 1]
+    tree[no] = merge_soma(tree[2 * no], tree[2 * no + 1])
 
 
 # ----------------------------------------------------------
@@ -327,6 +328,10 @@ tree_spo2 = [INF] * (4 * S)
 # ----------------------------------------------------------
 # build_min - monta a arvore de minimo
 # ----------------------------------------------------------
+def merge_min(a, b):
+    return min(a, b)
+
+
 def build_min(no, inicio, fim):
 
     if inicio == fim:
@@ -337,9 +342,7 @@ def build_min(no, inicio, fim):
     build_min(2 * no, inicio, meio)
     build_min(2 * no + 1, meio + 1, fim)
 
-    # *** UNICA DIFERENCA pro build_max / build ***
-    # min em vez de max (ou soma)
-    tree_spo2[no] = min(tree_spo2[2 * no], tree_spo2[2 * no + 1])
+    tree_spo2[no] = merge_min(tree_spo2[2 * no], tree_spo2[2 * no + 1])
 
 
 # ----------------------------------------------------------
@@ -359,9 +362,7 @@ def consulta_min(no, inicio, fim, l, r):
     meio = (inicio + fim) // 2
     menor_esq = consulta_min(2 * no, inicio, meio, l, r)
     menor_dir = consulta_min(2 * no + 1, meio + 1, fim, l, r)
-
-    # *** UNICA DIFERENCA pra consulta_max / consulta ***
-    return min(menor_esq, menor_dir)
+    return merge_min(menor_esq, menor_dir)
 
 
 # ----------------------------------------------------------
@@ -380,8 +381,7 @@ def atualiza_min(no, inicio, fim, posicao, novo_valor):
     else:
         atualiza_min(2 * no + 1, meio + 1, fim, posicao, novo_valor)
 
-    # *** UNICA DIFERENCA pro atualiza_max / atualiza ***
-    tree_spo2[no] = min(tree_spo2[2 * no], tree_spo2[2 * no + 1])
+    tree_spo2[no] = merge_min(tree_spo2[2 * no], tree_spo2[2 * no + 1])
 
 
 # ----------------------------------------------------------

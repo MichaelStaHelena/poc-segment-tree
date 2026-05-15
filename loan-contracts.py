@@ -70,6 +70,10 @@ NEUTRO_URG = ContratoEmprestimo(0, "-", 0.0, INF)
 tree_urg = [NEUTRO_URG] * (4 * C)
 
 
+def merge_urg(e, d):
+    return e if e.dias_para_pagar <= d.dias_para_pagar else d
+
+
 def build_urg(no, inicio, fim):
     if inicio == fim:
         tree_urg[no] = contratos_urg[inicio]
@@ -77,9 +81,7 @@ def build_urg(no, inicio, fim):
     meio = (inicio + fim) // 2
     build_urg(2 * no, inicio, meio)
     build_urg(2 * no + 1, meio + 1, fim)
-    e, d = tree_urg[2 * no], tree_urg[2 * no + 1]
-    # *** merge: menos dias_para_pagar vence ***
-    tree_urg[no] = e if e.dias_para_pagar <= d.dias_para_pagar else d
+    tree_urg[no] = merge_urg(tree_urg[2 * no], tree_urg[2 * no + 1])
 
 
 def consulta_urg(no, inicio, fim, l, r):
@@ -90,7 +92,7 @@ def consulta_urg(no, inicio, fim, l, r):
     meio = (inicio + fim) // 2
     e = consulta_urg(2 * no, inicio, meio, l, r)
     d = consulta_urg(2 * no + 1, meio + 1, fim, l, r)
-    return e if e.dias_para_pagar <= d.dias_para_pagar else d
+    return merge_urg(e, d)
 
 
 def atualiza_urg(no, inicio, fim, posicao, novo):
@@ -103,8 +105,7 @@ def atualiza_urg(no, inicio, fim, posicao, novo):
         atualiza_urg(2 * no, inicio, meio, posicao, novo)
     else:
         atualiza_urg(2 * no + 1, meio + 1, fim, posicao, novo)
-    e, d = tree_urg[2 * no], tree_urg[2 * no + 1]
-    tree_urg[no] = e if e.dias_para_pagar <= d.dias_para_pagar else d
+    tree_urg[no] = merge_urg(tree_urg[2 * no], tree_urg[2 * no + 1])
 
 
 print("==============================================")
@@ -148,6 +149,10 @@ NEUTRO_FOLGA = ContratoEmprestimo(0, "-", 0.0, -INF)
 tree_folga = [NEUTRO_FOLGA] * (4 * C)
 
 
+def merge_folga(e, d):
+    return e if e.dias_para_pagar >= d.dias_para_pagar else d
+
+
 def build_folga(no, inicio, fim):
     if inicio == fim:
         tree_folga[no] = contratos_folga[inicio]
@@ -155,9 +160,7 @@ def build_folga(no, inicio, fim):
     meio = (inicio + fim) // 2
     build_folga(2 * no, inicio, meio)
     build_folga(2 * no + 1, meio + 1, fim)
-    e, d = tree_folga[2 * no], tree_folga[2 * no + 1]
-    # *** merge: mais dias_para_pagar vence ***
-    tree_folga[no] = e if e.dias_para_pagar >= d.dias_para_pagar else d
+    tree_folga[no] = merge_folga(tree_folga[2 * no], tree_folga[2 * no + 1])
 
 
 def consulta_folga(no, inicio, fim, l, r):
@@ -168,7 +171,7 @@ def consulta_folga(no, inicio, fim, l, r):
     meio = (inicio + fim) // 2
     e = consulta_folga(2 * no, inicio, meio, l, r)
     d = consulta_folga(2 * no + 1, meio + 1, fim, l, r)
-    return e if e.dias_para_pagar >= d.dias_para_pagar else d
+    return merge_folga(e, d)
 
 
 def atualiza_folga(no, inicio, fim, posicao, novo):
@@ -181,8 +184,7 @@ def atualiza_folga(no, inicio, fim, posicao, novo):
         atualiza_folga(2 * no, inicio, meio, posicao, novo)
     else:
         atualiza_folga(2 * no + 1, meio + 1, fim, posicao, novo)
-    e, d = tree_folga[2 * no], tree_folga[2 * no + 1]
-    tree_folga[no] = e if e.dias_para_pagar >= d.dias_para_pagar else d
+    tree_folga[no] = merge_folga(tree_folga[2 * no], tree_folga[2 * no + 1])
 
 
 print()
@@ -215,6 +217,10 @@ NEUTRO_MENOR = ContratoEmprestimo(0, "-", INF, 0)
 tree_menor = [NEUTRO_MENOR] * (4 * C)
 
 
+def merge_menor(e, d):
+    return e if e.valor <= d.valor else d
+
+
 def build_menor(no, inicio, fim):
     if inicio == fim:
         tree_menor[no] = contratos_menor[inicio]
@@ -222,9 +228,7 @@ def build_menor(no, inicio, fim):
     meio = (inicio + fim) // 2
     build_menor(2 * no, inicio, meio)
     build_menor(2 * no + 1, meio + 1, fim)
-    e, d = tree_menor[2 * no], tree_menor[2 * no + 1]
-    # *** merge: menos valor vence ***
-    tree_menor[no] = e if e.valor <= d.valor else d
+    tree_menor[no] = merge_menor(tree_menor[2 * no], tree_menor[2 * no + 1])
 
 
 def consulta_menor(no, inicio, fim, l, r):
@@ -235,7 +239,7 @@ def consulta_menor(no, inicio, fim, l, r):
     meio = (inicio + fim) // 2
     e = consulta_menor(2 * no, inicio, meio, l, r)
     d = consulta_menor(2 * no + 1, meio + 1, fim, l, r)
-    return e if e.valor <= d.valor else d
+    return merge_menor(e, d)
 
 
 def atualiza_menor(no, inicio, fim, posicao, novo):
@@ -248,8 +252,7 @@ def atualiza_menor(no, inicio, fim, posicao, novo):
         atualiza_menor(2 * no, inicio, meio, posicao, novo)
     else:
         atualiza_menor(2 * no + 1, meio + 1, fim, posicao, novo)
-    e, d = tree_menor[2 * no], tree_menor[2 * no + 1]
-    tree_menor[no] = e if e.valor <= d.valor else d
+    tree_menor[no] = merge_menor(tree_menor[2 * no], tree_menor[2 * no + 1])
 
 
 print()
@@ -282,6 +285,10 @@ NEUTRO_MAIOR = ContratoEmprestimo(0, "-", -INF, 0)
 tree_maior = [NEUTRO_MAIOR] * (4 * C)
 
 
+def merge_maior(e, d):
+    return e if e.valor >= d.valor else d
+
+
 def build_maior(no, inicio, fim):
     if inicio == fim:
         tree_maior[no] = contratos_maior[inicio]
@@ -289,9 +296,7 @@ def build_maior(no, inicio, fim):
     meio = (inicio + fim) // 2
     build_maior(2 * no, inicio, meio)
     build_maior(2 * no + 1, meio + 1, fim)
-    e, d = tree_maior[2 * no], tree_maior[2 * no + 1]
-    # *** merge: mais valor vence ***
-    tree_maior[no] = e if e.valor >= d.valor else d
+    tree_maior[no] = merge_maior(tree_maior[2 * no], tree_maior[2 * no + 1])
 
 
 def consulta_maior(no, inicio, fim, l, r):
@@ -302,7 +307,7 @@ def consulta_maior(no, inicio, fim, l, r):
     meio = (inicio + fim) // 2
     e = consulta_maior(2 * no, inicio, meio, l, r)
     d = consulta_maior(2 * no + 1, meio + 1, fim, l, r)
-    return e if e.valor >= d.valor else d
+    return merge_maior(e, d)
 
 
 def atualiza_maior(no, inicio, fim, posicao, novo):
@@ -315,8 +320,7 @@ def atualiza_maior(no, inicio, fim, posicao, novo):
         atualiza_maior(2 * no, inicio, meio, posicao, novo)
     else:
         atualiza_maior(2 * no + 1, meio + 1, fim, posicao, novo)
-    e, d = tree_maior[2 * no], tree_maior[2 * no + 1]
-    tree_maior[no] = e if e.valor >= d.valor else d
+    tree_maior[no] = merge_maior(tree_maior[2 * no], tree_maior[2 * no + 1])
 
 
 print()

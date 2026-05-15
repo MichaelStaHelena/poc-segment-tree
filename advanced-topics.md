@@ -68,9 +68,9 @@ tree[node] += x     # basta somar no agregado
 
 Porque o mínimo de `[a+x, b+x, c+x]` é `min(a,b,c) + x` — o delta passa direto.
 
-### Ver o código pronto em [operations.py](operations.py)
+### Ver o padrão implementado em [`short-answer.md`](short-answer.md)
 
-A classe `LazySegmentTree` implementa exatamente isso — com o `* (end - start + 1)` aplicado corretamente.
+A seção de Lazy Propagation mostra `push_down`, `update_range` e `query_range` com o `* (end - start + 1)` aplicado corretamente para soma.
 
 ---
 

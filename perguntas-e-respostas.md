@@ -5,7 +5,7 @@ Ficha de consulta que montei estudando. Organizei por tema, não por ordem crono
 Arquivos do projeto que cito ao longo:
 - `presentation.md` - slides
 - `simple-operations.py` - os 3 casos que vou rodar ao vivo
-- `operations.py` - lazy e operações extras
+- `loan-contracts.py` / `loan-contracts.rs` - 5 use cases com objetos
 - `advanced-topics.md` - aprofundamento
 - `binary-tree-vs-segment-tree.md` - comparação com BST
 
@@ -48,7 +48,7 @@ Cinco que aparecem bastante:
 4. `range_update(l, r, v)` altera um intervalo inteiro com ajuda de lazy propagation, O(log n).
 5. `find_first(pred)` acha o primeiro índice que satisfaz um predicado, O(log n).
 
-No script da pré-apresentação só uso as três primeiras porque são suficientes pra fazer o ponto. As outras duas ficam no operations.py e são discutidas no advanced-topics.md.
+No script da pré-apresentação só uso as três primeiras porque são suficientes pra fazer o ponto. As outras duas estão discutidas no advanced-topics.md.
 
 *Por que o build é O(n) e não O(n log n)?*
 
@@ -108,7 +108,7 @@ tree[node] += x
 tree[node] += x * (end - start + 1)
 ```
 
-Isso veio do PDF e conferi no operations.py. A classe `LazySegmentTree` lá tem o `* (end - start + 1)` aplicado. Todos os materiais dizem que esse é o bug mais comum em lazy de soma, então anotei com destaque.
+Isso está documentado no advanced-topics.md e no short-answer.md. Todos os materiais dizem que esse é o bug mais comum em lazy de soma, então anotei com destaque.
 
 *Por que min e max não têm essa armadilha?*
 
@@ -206,7 +206,7 @@ Neutro é o valor que não altera o merge: `merge(x, neutro) = x`. Errar isso é
 
 *Como generaliza pra outras operações?*
 
-Troca duas coisas: a função de merge dos filhos e o elemento neutro. O esqueleto da árvore é idêntico. No simple-operations.py deixei marcadores `*** UNICA DIFERENCA ***` nas linhas que mudam entre os três casos, justamente pra não deixar dúvida sobre isso.
+Troca duas coisas: a função de merge dos filhos e o elemento neutro. O esqueleto da árvore é idêntico. No `simple-operations.py` cada use case define sua própria função `merge_max`, `merge_soma` ou `merge_min` — a única linha que muda entre os três casos. O mesmo padrão aparece em `loan-contracts.py` com `merge_urg`, `merge_folga`, etc.
 
 ---
 
